@@ -26,7 +26,7 @@ class TelegramAdapter:
         sender_id = str(update.effective_user.id) if update.effective_user else ''
 
         if settings.telegram_allowed_chat_id and chat_id != settings.telegram_allowed_chat_id:
-            await msg.reply_text('Unauthorized chat.')
+            await msg.reply_text(f'Unauthorized chat. Your Chat ID is {chat_id}')
             return
 
         text = msg.text or msg.caption or ''
