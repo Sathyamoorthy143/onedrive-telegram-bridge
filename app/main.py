@@ -48,15 +48,22 @@ def process_event(event):
 async def lifespan(app: FastAPI):
     # Startup logic
     global telegram_adapter
+    tb_app = None
     if settings.telegram_bot_token and telegram_adapter is not None:
-        from threading import Thread
-        logger.info("Starting Telegram polling thread...")
-        Thread(target=telegram_adapter.run, daemon=True).start()
+        logger.info("Starting Telegram bot natively...")
+        tb_app = telegram_adapter.build()
+        await tb_app.initialize()
+        await tb_app.start()
+        await tb_app.updater.start_polling(drop_pending_updates=True)
     
     yield
     
     # Shutdown logic
     logger.info("Shutting down bridge...")
+    if tb_app is not None:
+        await tb_app.updater.stop()
+        await tb_app.stop()
+        await tb_app.shutdown()
 
 
 def create_app() -> FastAPI:
